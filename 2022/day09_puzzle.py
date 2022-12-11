@@ -89,3 +89,7 @@ if __name__ == '__main__':
     state_history = process_states(initial_state=initial_state, commands=commands)
     print(count_tail_locations(state_history))
 
+    initial_state = [(0,0) for _ in range(10)]
+    state_history = process_states(initial_state=initial_state, commands=commands)
+    print(count_tail_locations(state_history))
+
