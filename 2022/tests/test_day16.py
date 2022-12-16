@@ -1,4 +1,4 @@
-import pytest
+
 import sys
 sys.path.append('..')
 
@@ -14,6 +14,7 @@ Valve GG has flow rate=0; tunnels lead to valves FF, HH
 Valve HH has flow rate=22; tunnel leads to valve GG
 Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II"""
+
 
 BEST_SOL = """== Minute 1 ==
 No valves are open.
@@ -133,5 +134,17 @@ Valves BB, CC, DD, EE, HH, and JJ are open, releasing 81 pressure.
 BEST_VALUE = 1651
 
 
-def test_parse_file():
-    d16.parse_file()
+def test_best_example_solution():
+    open_order = ['DD', 'BB', 'JJ', 'HH', 'EE', 'CC', ]
+    expected = 1651
+
+    underground = d16.file_contents_to_underground(EXAMPLE_SCHEMA)
+    distances = d16.distance_list(underground)
+    result, bound = d16._evaluate(underground, distances, open_order)
+    assert expected == result
+
+def test_finding_greatest_flow():
+    underground = d16.file_contents_to_underground(EXAMPLE_SCHEMA)
+    max_flow = d16.find_greatest_flow(underground, 'AA', 30)
+    assert max_flow == 1651
+

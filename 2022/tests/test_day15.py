@@ -87,13 +87,7 @@ def test_what_locations_are_okay():
         day15._intervals_beacons_forbidden(pair, y_line, x_min=0, x_max=20)
         for pair in pairs if pair for y_line in range(20)
     ], [])
-    print(intervals[0])
-    print(intervals[1])
-    print(intervals[2])
     intervals = set(intervals)
     assert (14, 11) not in intervals
-    #assert len(intervals) > 400
-    #assert len(intervals) == 21*21 - 1
-    print(intervals)
 
 

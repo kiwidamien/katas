@@ -114,7 +114,6 @@ def find_minimum_small_enough(root: Node, total_space: int, space_needed: int) -
     free_space = total_space - find_size['/']
     size_to_free = space_needed - free_space
     sizes = sorted(s for s in find_size.values() if s >= size_to_free)
-    print(sizes)
     return sizes[0]
 
 
