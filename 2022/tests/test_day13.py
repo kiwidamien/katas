@@ -61,6 +61,5 @@ def test_print_sort():
     pairs = day13.string_to_pairs(EXAMPLE)
     flattened = day13.order_all_signals_and_add_breakers(pairs)
     visualization = "\n".join(str(x) for x in flattened)
-    print(visualization)
     assert visualization != ""
 
