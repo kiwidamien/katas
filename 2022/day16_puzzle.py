@@ -163,6 +163,61 @@ def problem_1_find_max_flow():
     max_flow = find_greatest_flow(underground, 'AA', 30)
     return max_flow
 
+######
+# What if we could have two workers?
+# Dual State is (1) where they are and (2) when they will be available for the next instruction
+DualState = Tuple[str, int]
+
+
+def _best_dual_worker_subtree(
+    underground: Dict[str, Station],
+    distances: Dict[str, Dict[str, int]],
+    closed_valves: Set[str],
+    current: DualState,
+    time_limit: int,
+    current_flow: int
+):
+    def change_state(name_and_time, new_state):
+        name, time_so_far = name_and_time
+        time_so_far += distances[name][new_state] + 1
+        return (new_state, time_so_far)
+
+    if len(closed_valves) == 0:
+        return current_flow
+    if current[0][1] > time_limit:
+        return -float('inf')
+    if current[1][1] > time_limit:
+        return -float('inf')
+
+    candidates = [current_flow]
+    for next_station in closed_valves:
+        pass
+    return max(candidates)
+
+
+def find_max_flow_two_workers(
+    underground: Dict[str, Station],
+    start_loc: Tuple[str, str],
+    time_limit: int
+):
+    non_trivial = [name for name, station in underground.items() if station.flow_rate > 0]
+    distances = distance_list(underground)
+    result = _best_dual_worker_subtree(
+        underground=underground,
+        distances=distances,
+        closed_valves=set(non_trivial),
+        current=( (start_loc[0], 0), (start_loc[0], 0) ),
+        time_limit=time_limit,
+        current_flow=0
+    )
+    return result
+
+
+def problem_2_find_max_flow():
+    underground = parse_file()
+    max_flow = find_max_flow_two_workers(underground, start_loc=("AA", "AA"), time_limit=26)
+    return max_flow
+
 
 if __name__=='__main__':
     print("Problem 1: max flow is ", problem_1_find_max_flow())
