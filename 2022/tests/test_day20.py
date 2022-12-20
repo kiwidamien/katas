@@ -27,6 +27,20 @@ def test_mixing_example(example):
     expected = [0, 3, -2, 1, 2, -3, 4]
     assert expected==d20.mix_from_zero(example)
 
+
 def test_get_coords(example):
     expected = [4, -3, 2]
     assert expected == d20.get_coords(example)
+
+
+def test_wrap_around():
+    example = [0, 2, 1]
+    # Step 1: [0, 2, 1]
+    # Step 2: [0, 2, 1]
+    # Step 3: [0, 1, 2] --> [0, 1, 2]
+    assert [0, 1, 2] == d20.mix_from_zero(example)
+
+def test_in_place():
+    example = [0, 3, 1]
+    # Step 1: [0, 3, 1]
+    # Step 2: 
