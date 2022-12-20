@@ -40,7 +40,7 @@ from collections import deque
 import re
 from dataclasses import dataclass
 
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 underground = {}
