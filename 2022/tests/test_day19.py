@@ -21,12 +21,14 @@ def test_parsing_line2():
     assert expected == d19.parse_line(EXAMPLE.split('\n')[1])
 
 
+@pytest.mark.slow
 def test_largest_numer_of_geodes():
     expected = 9
     blueprint = d19.parse_line(EXAMPLE.split('\n')[0])
     assert expected == d19.search(blueprint=blueprint, time=24)
 
 
+@pytest.mark.slow
 def test_largest_number_of_geodes_two():
     expected = 12
     blueprint = d19.parse_line(EXAMPLE.split('\n')[1])

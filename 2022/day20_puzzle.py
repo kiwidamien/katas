@@ -101,10 +101,32 @@ def prob1_get_sum_coord():
     return sum(coords)
 
 
+def coord_with_decryption(orig):
+    key = 811589153
+    decrypt = [key*num for num in orig]
+    linked = CircularLinkedList(decrypt)
+    for _ in range(10):
+        for node in linked.nodes:
+            node.move(node.num % (linked.length - 1))
+    flat = linked.flatten_from_zero()
+    return flat
+
+
+def sum_coord_with_decryption(orig):
+    flat = coord_with_decryption(orig)
+    return sum([flat[index % len(orig)] for index in (1000, 2000, 3000)])
+
+
+def prob2_sum_with_decryption():
+    orig = parse_file()
+    return sum_coord_with_decryption(orig)
+
+
 def parse_file():
     with open('day20_input.txt') as f:
         return process_string(f.read())
 
 if __name__=='__main__':
     print(f'Sum of cooordinates:', prob1_get_sum_coord())
-    
+    print('Decrypted sum:', prob2_sum_with_decryption())
+

@@ -40,7 +40,7 @@ def test_wrap_around():
     # Step 3: [0, 1, 2] --> [0, 1, 2]
     assert [0, 1, 2] == d20.mix_from_zero(example)
 
-def test_in_place():
-    example = [0, 3, 1]
-    # Step 1: [0, 3, 1]
-    # Step 2: 
+
+def test_decryption_with_mode(example):
+    expected = [0, -2434767459, 1623178306, 3246356612, -1623178306, 2434767459, 811589153]
+    assert expected == d20.coord_with_decryption(example)
