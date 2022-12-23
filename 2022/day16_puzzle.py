@@ -146,6 +146,28 @@ def _best_in_subtree(
     return max(candidates)
 
 
+def _best_in_subtree_cached(
+    undeground: Dict[str, Station],
+    distances: Dict[str, Dict[str, int]],
+    closed_valves: Set[str],
+    current: str,
+    time_remaining: int,
+    current_flow: int,
+    current_state: Tuple[str],
+    current_cache: Dict,
+):
+    if len(closed_valves) == 0:
+        return current_flow
+    if time_remaining < 0:
+        return -float('inf')
+    candidates = [current]
+    for next_station in closed_valves:
+        new_time = time_remianing - distances[current][next_station] - 1
+        new_closed = closed_valves - {next_station}
+        new_flow = new_time * underground[next_station].flow_rate
+        new_state =  current_state + (next_station, )
+
+
 def find_greatest_flow(
     underground: Dict[str, Station],
     start_loc: str="AA",
