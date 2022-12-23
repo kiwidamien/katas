@@ -147,7 +147,7 @@ def _best_in_subtree(
 
 
 def _best_in_subtree_cached(
-    undeground: Dict[str, Station],
+    underground: Dict[str, Station],
     distances: Dict[str, Dict[str, int]],
     closed_valves: Set[str],
     current: str,
@@ -156,16 +156,48 @@ def _best_in_subtree_cached(
     current_state: Tuple[str],
     current_cache: Dict,
 ):
+    """Solution is more complicated, but keeps track of the valves
+    closed so we have path information as well.
+
+    There should be an attempt to do some early pruning. This might mean
+    moving to BFS?
+    One naive attempt that failed was to keep the best score for the current
+    list of visted nodes (the canonical ordering), and  not explore the subtree
+    if there was a canonical order that did better.
+    
+    This failed because it didn't include your current location, so two different 
+    ordering of opening the same set of valves the lower scoring one might be better as
+    it sets you up better for opening the NEXT valve.
+
+    Some early pruning could be done where we look at the theoretical max we could get
+    from the remaining days, and use that to prune. Right now takes ~2 minutes on real
+    input, so not great but still workable.
+    """
     if len(closed_valves) == 0:
         return current_flow
     if time_remaining < 0:
         return -float('inf')
-    candidates = [current]
     for next_station in closed_valves:
-        new_time = time_remianing - distances[current][next_station] - 1
+        new_time = time_remaining - distances[current][next_station] - 1
+        if new_time < 0: continue
         new_closed = closed_valves - {next_station}
-        new_flow = new_time * underground[next_station].flow_rate
+        new_flow = current_flow + new_time * underground[next_station].flow_rate
         new_state =  current_state + (next_station, )
+        canonical_state = tuple(sorted(new_state))
+        if canonical_state in current_cache and current_cache[canonical_state][0] > new_flow:
+            pass
+        else:
+            current_cache[canonical_state] = (new_flow, new_state)
+        _best_in_subtree_cached(
+                underground, distances, 
+                closed_valves=new_closed,
+                current=next_station,
+                time_remaining=new_time,
+                current_flow = new_flow,
+                current_state = new_state,
+                current_cache = current_cache
+            )
+    return max(current_cache.values())
 
 
 def find_greatest_flow(
@@ -180,66 +212,76 @@ def find_greatest_flow(
     return result
 
 
+def find_greatest_flow_two(
+    underground: Dict[str, Station],
+    start_loc: str="AA",
+    time_limit: int=30
+) -> int:
+    non_trivial = [name for name, station in underground.items() if station.flow_rate > 0]
+    distances = distance_list(underground)
+    cache={}
+    result = _best_in_subtree_cached(underground, distances, set(non_trivial), start_loc, time_limit,
+                                    current_flow=0, current_state=(), current_cache=cache)
+    return result[0]
+
+
 def problem_1_find_max_flow():
     underground = parse_file()
     max_flow = find_greatest_flow(underground, 'AA', 30)
     return max_flow
 
-######
-# What if we could have two workers?
-# Dual State is (1) where they are and (2) when they will be available for the next instruction
-DualState = Tuple[str, int]
 
+"""
+Part 2: Two workers!
 
-def _best_dual_worker_subtree(
+The story in AoC is that we can train the elephant to help us close valves! 
+It costs four minutes to train the elephant, but then we have two workers doing
+what we were doing before.
+
+I initially tried to do this as a dual worker problem (state space with two workers
+exploring valid states). It was pointed out to me that we can look at all the different
+single worker solution and pick the two that maximize the sum of the outputs, given that
+they do not close the same valve:
+
+    max(flow1 + flow2)  given set(valve1).intersect(set(valve2)) = {}
+
+This meant rewriting the greatest flow algo to surface the valves, and to not early prune
+as aggressively.
+"""
+
+def find_greatest_flow_two_workers(
     underground: Dict[str, Station],
-    distances: Dict[str, Dict[str, int]],
-    closed_valves: Set[str],
-    current: DualState,
-    time_limit: int,
-    current_flow: int
-):
-    def change_state(name_and_time, new_state):
-        name, time_so_far = name_and_time
-        time_so_far += distances[name][new_state] + 1
-        return (new_state, time_so_far)
-
-    if len(closed_valves) == 0:
-        return current_flow
-    if current[0][1] > time_limit:
-        return -float('inf')
-    if current[1][1] > time_limit:
-        return -float('inf')
-
-    candidates = [current_flow]
-    for next_station in closed_valves:
-        pass
-    return max(candidates)
-
-
-def find_max_flow_two_workers(
-    underground: Dict[str, Station],
-    start_loc: Tuple[str, str],
-    time_limit: int
+    start_loc: str="AA",
+    time_limit: int=26
 ):
     non_trivial = [name for name, station in underground.items() if station.flow_rate > 0]
     distances = distance_list(underground)
-    result = _best_dual_worker_subtree(
-        underground=underground,
-        distances=distances,
-        closed_valves=set(non_trivial),
-        current=( (start_loc[0], 0), (start_loc[0], 0) ),
-        time_limit=time_limit,
-        current_flow=0
+    cache = {}
+    _best_in_subtree_cached(
+        underground, distances, set(non_trivial), start_loc, time_limit,
+        current_flow=0, current_state=(), current_cache=cache
     )
-    return result
+    current_max = -float('inf')
+    
+    #print(cache[('BB', 'CC', 'JJ')])
+    #print(cache[('DD', 'EE', 'HH')])
+
+    for visited1, (flow1, _) in cache.items():
+        for visited2, (flow2, _) in cache.items():
+            if set(visited1).intersection(set(visited2)):
+                continue
+            this_flow = flow1 + flow2
+            current_max = max(current_max, this_flow)
+    return current_max
+
 
 
 def problem_2_find_max_flow():
     underground = parse_file()
-    max_flow = find_max_flow_two_workers(underground, start_loc=("AA", "AA"), time_limit=26)
+    max_flow = find_greatest_flow_two_workers(underground, start_loc="AA", time_limit=26)
     return max_flow
 
 
 if __name__=='__main__':
     print("Problem 1: max flow is ", problem_1_find_max_flow())
+    print("Problem 2: max flow is ", problem_2_find_max_flow())

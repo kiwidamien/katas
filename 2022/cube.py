@@ -46,6 +46,9 @@ X3XX
 4's neighbors:3,5,6,2
 5's neighbors:3,2,6,4
 6's neighbors:4,5,2,1
+"""
+
+
 face_1 = {
     (1, 0): (3, 0),
     (0, 1): (2, 0),

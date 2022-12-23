@@ -148,3 +148,13 @@ def test_finding_greatest_flow():
     max_flow = d16.find_greatest_flow(underground, 'AA', 30)
     assert max_flow == 1651
 
+   
+def test_finding_greatest_flow_using_cache():
+    underground = d16.file_contents_to_underground(EXAMPLE_SCHEMA)
+    max_flow = d16.find_greatest_flow_two(underground, 'AA', 30)
+    assert max_flow == 1651
+
+def test_finding_greatest_flow_with_two_workers():
+    underground = d16.file_contents_to_underground(EXAMPLE_SCHEMA)
+    max_flow = d16.find_greatest_flow_two_workers(underground, 'AA', 26)
+    assert max_flow == 1707
