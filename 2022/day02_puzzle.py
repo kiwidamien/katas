@@ -18,7 +18,7 @@ def score_round(opponent: str, you: str) -> int:
 
 
 def read_strategy_guide():
-    with open("second_puzzle_input.txt", "r") as f:
+    with open("day02_input.txt", "r") as f:
         moves = [moves.split() for moves in f.readlines()]
     return moves
 
