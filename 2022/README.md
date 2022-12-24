@@ -51,6 +51,8 @@ Keeping a collection of resources here that I find useful for getting started wi
 * [Some tips and tricks for doing Advent of Code with Haskell](https://wjwh.eu/posts/2022-11-30-haskell-aoc-tricks.html), updated 2022-11-30
 * [Learning Haskell via Advent of Code](https://ndreynolds.com/posts/2019-02-05-learning-haskell-via-advent-of-code.html), updated 2019-02-05
 
+I have really liked [LunarCoffee's collection](https://github.com/lunarcoffee/advent-of-code/tree/main/2022) of Haskell solutions for this year's Advent Of Code.
+I have done the solutions myself before looking at these, but reviewing afterward has helped me think in a more idiomatic way.
 
 ## Table of problems
 
