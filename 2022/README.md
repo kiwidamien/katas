@@ -79,6 +79,6 @@ Keeping a collection of resources here that I find useful for getting started wi
 | 21  | Monkey Math | DAGs | Yes | No |
 | 22  | Monkey Map  | Geometry and State Machine | ?? | No |
 | 23  | Unstable Diffusion | State Machine | Yes | No |
-| 24  | ?? | ?? | ?? | No |
+| 24  | Blizzard Basin | Shortest Path + State Machine | ?? | No |
 | 25  | ?? | ?? | ?? | No |
 
