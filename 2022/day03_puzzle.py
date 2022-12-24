@@ -24,7 +24,7 @@ def find_priority_rugsack(line: str) -> int:
 
 
 def parse_rugsacks():
-    with open('third_puzzle_input.txt','r') as f:
+    with open('day03_input.txt','r') as f:
         lines = [line.strip() for line in f.readlines()]
     return lines
 

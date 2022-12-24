@@ -5,7 +5,7 @@ import Data.Char (ord)
 
 
 main = do
-    contents <- readFile "third_puzzle_input.txt"
+    contents <- readFile "day03_input.txt"
     print(sumPartitionScores(words contents))
     print(findBadgeScoreTriples(words contents))
 
