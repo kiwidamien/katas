@@ -11,7 +11,7 @@ def parse_line(line: str) -> Tuple[Interval, Interval]:
 
 
 def parse_input() -> List[Pair]:
-    with open('fourth_puzzle_input.txt', 'r') as f:
+    with open('day04_input.txt', 'r') as f:
         intervals = [parse_line(line.strip()) for line in f.readlines()]
     return intervals
 

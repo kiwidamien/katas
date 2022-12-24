@@ -4,7 +4,7 @@ import Data.List
 
 
 main = do
-    contents <- readFile "elves_day1.txt"
+    contents <- readFile "day01_input.txt"
     let elfs = elfCalorieParse . split $ contents
       in do
       print . elfWithMaxCalories $ elfs

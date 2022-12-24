@@ -1,7 +1,7 @@
 from typing import List
 
 
-def get_elves(file='elves_day1.txt'):
+def get_elves(file='day01_input.txt'):
     with open(file, 'r') as f:
         content = [[int(c) for c in elf.split()] for elf in f.read().split("\n\n")]
     return content

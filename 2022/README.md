@@ -10,7 +10,9 @@ heavy IO processing to get started are going to be more frustrating than enlight
 I am making a table of problems that includes a list of whether the problem is suitable
 for a beginning Haskeller, and whether I have done that particular problem.
 
-## Comments on TDD
+## Testing
+
+### Comments on TDD
 
 I have used pytest quite a bit at work. One of the challenges of TDD (in particular, strict
 adherence to the Red-Green-Refactor methods) is that your test suite can be quite brittle.
@@ -34,13 +36,21 @@ AoC is really nice for this because
 
 I will admit that in some of the intermediate steps, where I have encountered problems, it has been difficult to debug using the tests without doing coupling to my private API. Sometimes I have dropped into a REPL to experiment, sometimes I have created a test and deleted it once I have debugged.
 
-## Testing extensions
+### Testing extensions
 
 There are a couple of problems that have looked like they would be a good tes bed for using property-based testing and hypothesis.
 
 The circular linked list problem on day 21 is a good example. There are properties such as "move forward n places and then back n places should leave the list invariant" or "move forward by the length of the list should leave the list invariant" (it is actually the length of the list - 1, as we don't jump the element being moved).
 
 By the time I have seen a problem and identified hypothesis as an interesting experiment, I have already solved the problem. It might be interesting to go back through and add these property-based tests in as a way of building that muscle.
+
+## Haskell
+
+Keeping a collection of resources here that I find useful for getting started with the AoC style problems.
+
+* [Some tips and tricks for doing Advent of Code with Haskell](https://wjwh.eu/posts/2022-11-30-haskell-aoc-tricks.html), updated 2022-11-30
+* [Learning Haskell via Advent of Code](https://ndreynolds.com/posts/2019-02-05-learning-haskell-via-advent-of-code.html), updated 2019-02-05
+
 
 ## Table of problems
 
@@ -49,7 +59,7 @@ By the time I have seen a problem and identified hypothesis as an interesting ex
 | 01  | Calorie Counting | Simple sums  | Yes | Yes |
 | 02  | Rock Paper Scissors | Rock-Paper-Scissors | Yes, particularly for maps | No |
 | 03  | Rugsack Reorg | Search for duplicates | Yes | Yes |
-| 04  | Camp Cleanup | Overlaps | Yes | No |
+| 04  | Camp Cleanup | Overlaps | Yes | Yes |
 | 05  | Supply Stacks | Stack manipulation | No | No |
 | 06  | Tuning Trouble | Search for duplicates | Yes | Yes |
 | 07  | No space on device | Tree | No | No |
