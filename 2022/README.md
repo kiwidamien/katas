@@ -82,5 +82,5 @@ I have done the solutions myself before looking at these, but reviewing afterwar
 | 22  | Monkey Map  | Geometry and State Machine | ?? | No |
 | 23  | Unstable Diffusion | State Machine | Yes | No |
 | 24  | Blizzard Basin | Shortest Path + State Machine | ?? | No |
-| 25  | ?? | ?? | ?? | No |
+| 25  | ?? | Changing numeric bases (num theory) | Yes | Yes |
 
