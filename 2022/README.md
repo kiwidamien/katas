@@ -56,31 +56,31 @@ I have done the solutions myself before looking at these, but reviewing afterwar
 
 ## Table of problems
 
-| Day | Name | Problem Type | Easyish for Haskell | Haskell done |
-|-----|------|--------------|---------------------|--------------|
-| 01  | Calorie Counting | Simple sums  | Yes | Yes |
-| 02  | Rock Paper Scissors | Rock-Paper-Scissors | Yes, particularly for maps | No |
-| 03  | Rugsack Reorg | Search for duplicates | Yes | Yes |
-| 04  | Camp Cleanup | Overlaps | Yes | Yes |
-| 05  | Supply Stacks | Stack manipulation | No | No |
-| 06  | Tuning Trouble | Search for duplicates | Yes | Yes |
-| 07  | No space on device | Tree | No | No |
-| 08  | Treetop Tower | Grid Search | Yes | No |
-| 09  | Rope Bridge | State Machine | Yes | No |
-| 10  | Cathode-Ray Tubes  | State Machine | Yes | No |
-| 11  | Monkey in the Middle | State Machine | No  | No |
-| 12  | Hill Climbing | BFS | Yes | No |
-| 13  | Distress Signal | Parser | Yes | No |
-| 14  | Regolith Reservoir | State Machine | ?? | No |
-| 15  | Beacon Exclusion Zone | Geometry | ?? | No |   
-| 16  | Proboscidea Volcanium | BFS (implemented as DFS!) | ?? | No |
-| 17  | Pyroclastic Flow (Tetris) | State Machine | ?? | No |
-| 18  | Boiling Boulders | Geometry, flood fill | Yes | No |
-| 19  | Not Enough Minerals | BFS | Yes | No |
-| 20  | Grove Positioning System | Circular linked list | Yes | No |
-| 21  | Monkey Math | DAGs | Yes | No |
-| 22  | Monkey Map  | Geometry and State Machine | ?? | No |
-| 23  | Unstable Diffusion | State Machine | Yes | No |
-| 24  | Blizzard Basin | Shortest Path + State Machine | ?? | No |
-| 25  | ?? | Changing numeric bases (num theory) | Yes | Yes |
+| Day   | Name                      | Problem Type                        | Easyish for Haskell        | Haskell done   |
+| ----- | ------                    | --------------                      | ---------------------      | -------------- |
+| 01    | Calorie Counting          | Simple sums                         | Yes                        | Yes            |
+| 02    | Rock Paper Scissors       | Rock-Paper-Scissors                 | Yes, particularly for maps | Yes            |
+| 03    | Rugsack Reorg             | Search for duplicates               | Yes                        | Yes            |
+| 04    | Camp Cleanup              | Overlaps                            | Yes                        | Yes            |
+| 05    | Supply Stacks             | Stack manipulation                  | No                         | No             |
+| 06    | Tuning Trouble            | Search for duplicates               | Yes                        | Yes            |
+| 07    | No space on device        | Tree                                | No                         | No             |
+| 08    | Treetop Tower             | Grid Search                         | Yes                        | No             |
+| 09    | Rope Bridge               | State Machine                       | Yes                        | No             |
+| 10    | Cathode-Ray Tubes         | State Machine                       | Yes                        | No             |
+| 11    | Monkey in the Middle      | State Machine                       | No                         | No             |
+| 12    | Hill Climbing             | BFS                                 | Yes                        | No             |
+| 13    | Distress Signal           | Parser                              | Yes                        | No             |
+| 14    | Regolith Reservoir        | State Machine                       | ??                         | No             |
+| 15    | Beacon Exclusion Zone     | Geometry                            | ??                         | No             |
+| 16    | Proboscidea Volcanium     | BFS (implemented as DFS!)           | ??                         | No             |
+| 17    | Pyroclastic Flow (Tetris) | State Machine                       | ??                         | No             |
+| 18    | Boiling Boulders          | Geometry, flood fill                | Yes                        | No             |
+| 19    | Not Enough Minerals       | BFS                                 | Yes                        | No             |
+| 20    | Grove Positioning System  | Circular linked list                | Yes                        | No             |
+| 21    | Monkey Math               | DAGs                                | Yes                        | No             |
+| 22    | Monkey Map                | Geometry and State Machine          | ??                         | No             |
+| 23    | Unstable Diffusion        | State Machine                       | Yes                        | No             |
+| 24    | Blizzard Basin            | Shortest Path + State Machine       | ??                         | No             |
+| 25    | Full of Hot Air           | Changing numeric bases (num theory) | Yes                        | Yes            |
 

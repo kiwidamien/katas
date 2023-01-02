@@ -207,12 +207,15 @@ def height_of_tower_many(jets, n_rocks, width=7):
     rem_rocks = leftover_rocks % cycle_data['rocks_per_cycle']
 
     base_height = height_of_tower(jets=jets, n_rocks=cycle_data['burnin_rocks'] + rem_rocks, width=width)
+    print(base_height)
+    print(cycle_data)
     return base_height + num_cycles * cycle_data['height_per_cycle']
 
 
 if __name__=='__main__':
     print(f'After 2022 rocks have dropped, the height is', prob1_find_height_after_2022_rocks())
-    many = 1000000000000
+    #many = 1000000000000
+    many = 2022
     jets = parse_file()
     height_of_many = height_of_tower_many(jets=jets, n_rocks=many)
     print(f'After {many:,} rocks have dropped, the height is', height_of_many)
