@@ -11,30 +11,27 @@ test=["[({(<(())[]>[[{[]{<()<>>",
   "<{([([[(<>()){}]>(<<{{",
   "<{([{{}}[<[[[<>{}]]]>[]]"]
 
-oneExample = "[({(<(())[]>[[{[]{<()<>>"
-
-
 eliminate :: Char -> Char -> String -> String
-eliminate open close (s1:s2:rest) = if (s1==open)&&(s2==close) then (eliminate open close rest) else (s1:(eliminate open close (s2:rest)))
-eliminate open close (s:rest) = (s:eliminate open close rest)
-eliminate open close "" = ""
+eliminate _ _ "" = ""
+eliminate _ _ (c:[]) = [c]
+eliminate open close (pot_open:pot_close:rest)
+    | pot_open /= open = pot_open:(eliminate open close (pot_close:rest))
+    | pot_close == close = eliminate open close rest
+    | otherwise = pot_open:(eliminate open close (pot_close:rest))
 
 eliminateCycle :: String -> String
 eliminateCycle s = (eliminate '(' ')' $ eliminate '[' ']' $ eliminate '<' '>' $ eliminate '{' '}' s)
 
 
-eliminateUntilStop :: String -> String
-eliminateUntilStop s = if (length s == length reduced) then reduced else eliminateUntilStop reduced
+reduceString :: String -> String
+reduceString s = if (length s == length reduced) then reduced else reduceString reduced
   where reduced = eliminateCycle s
 
 findFirstIllegalChar :: String -> Char 
-findFirstIllegalChar s = snd $ safeHead $ filter openClosedPair $ zip reduced (tail reduced)
-  where openClosedPair (a,b)=(elem a "([<{") && (elem b ")>}]")
-        reduced = eliminateUntilStop s
-        safeHead lst 
-           | lst==[] = (' ', ' ') 
-           | otherwise = head lst
-
+findFirstIllegalChar s 
+  | (length closed) > 0 = head closed
+  | otherwise = ' ' 
+  where closed = filter (\x->elem x ")}]>") $ reduceString s
 
 scoreError :: String -> Int
 scoreError s
@@ -49,7 +46,7 @@ autocomplete :: String -> String
 autocomplete beg 
   | illegal = "" 
   | otherwise = reverse $ reduced
-  where reduced = eliminateUntilStop beg
+  where reduced = reduceString beg
         illegal = foldl (||) False $ map (\x->elem x ")}>]") reduced  
 
 scoreAutocomplete :: String -> Int
