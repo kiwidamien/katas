@@ -144,7 +144,7 @@ autocomplete beg
 
 ### A python stack implementation
 
-To detect if a string was illegal or not, we maintained a stack of opening characters.
+As described above, we can also implement this as a stack for an O(N) solution (vs O(N^2) from the string replacement solution). The idea was
 * If we encounter an opening character `({<[`, then we push it onto the stack
 * If we encounter a closing character `)}>]`, then we compare to the top of the stack.
   * If the parens match, we pop the top of the stack (and it is still in a legal state).
@@ -189,38 +189,46 @@ def return_completion(s: str) -> str:
 
 This is an O(N) solution, as we only have to pass through the string once. In terms of design, it is a little problematic that `return_completion` returns a blank string for both a balanced string and an illegal string! We can easily write wrappers like `def is_balanced(s): return reduce_stack(s)==""` if we need a test for balancing the string.
 
-Initially I decided that I didn't want to try and implement a stack in Haskell, so I viewed the problem as a string reduction problem instead.
+Let's try doing the same thing in Haskell. A lot of the inspiration came from [this repo](https://github.com/brilee/advent-haskell/blob/main/src/Day10.hs)
+```haskell
+import Data.List
 
-### The problem as string reduction (Haskell and Python)
-
-A different approach is to take advantage of the string only being open and closed characters. This means we can do a search and replace on the pairs `"()"`, `"<>"`, `"[]"`, `"{}"` and replace them with nothing. We can continue to do this until the size of the string doesn't change.
-
-Let's see a Python implementation:
-```python
-def reduce_string(s: str) -> str:
-    length = -1
-    while (length != len(s)):
-        length = len(s)
-        s = s.replace("()", "").replace("<>", "").replace("{}", "").replace("[]", "")
-    return s
+data MaybeStack = Stack String | Error Char deriving Show
 
 
-def first_illegal_char(s: str) -> str:
-    for char in reduce_string(s):
-        if char in ")>}]": return char
-    return ""
+reduceString :: String -> MaybeStack 
+reduceString s = foldl' addCharToStack (Stack "") s
 
 
-def return_autocompletion(s: str) -> str:
-    d = {'{': '}', '(':')', '<':'>', '[':']'}
-    try:
-        complete = [d[char] for char in reduce_string(s)[::-1]]
-    except KeyError:
-        return ""  # Could also be an error
-    return ''.join(complete)
+addCharToStack :: MaybeStack -> Char -> MaybeStack
+addCharToStack (Error c) _ = Error c
+addCharToStack (Stack "") c
+  | elem c "({<[" = Stack [c]
+  | elem c ")}>]" = Error c
+addCharToStack (Stack (top:rest)) c
+  | elem c "({<[" = Stack (c:top:rest)
+  | elem c ")}>]" && matches = Stack rest
+  | elem c ")}>]" && not matches = Error c
+    where pairs = ["()", "[]", "<>", "{}"]
+          matches = elem [top, c] pairs
 
+
+firstIllegalChar :: String -> Maybe Char
+firstIllegalChar s = f $ reduceString s
+  where f (Error c) = Just c
+        f (Stack s) = Nothing
+
+
+-- Like in the Python implementation, we have not changed openings to closings.
+-- The autocomplete string tells you the openings you need to close
+-- e.g. autocomplete "([<" returns Just "<[(", the correct autocomplete is ">])"
+autocomplete :: String -> Maybe String
+autocomplete prefix = f $ reduceString prefix
+  where f (Error c) = Nothing
+        f (Stack s) = Just reverse s
 ```
 
-The code is shorter, and we are only doing string matching. It is significantly worse asymptotically: O(N^2)! We achieve this worst case by interleaving opening and closing symbols, so we only reduce one pair at a time. For example `"([([([([([([])])])])])])"` is a balanced string, but only two symbols get reduced in every replace loop.
+It is a little better than the Python version because we have been explicit about the error states, rather than passing a space or  some other "sentinal" value.
 
-Still, the code looked simpler to translate into Haskell. Let's start off implementing 
+In the case of Python, actually creating the autocomplete string would be relatively trivial. In the Haskell case,
+it is significantly more involved, because dictionaries / maps are not quite as easy to construct and use.
