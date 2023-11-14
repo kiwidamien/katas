@@ -65,7 +65,6 @@ def _solve(
     # Have we arrived at any contradictions?
     if any([len(possibilities) == 0 for possibilities in new_p.values()]):
         return None
-
     if new_solved != solved:
         return _solve(new_p, new_solved)
 
