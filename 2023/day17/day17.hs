@@ -3,82 +3,72 @@ module Day17 where
 import Data.Char (digitToInt)
 import qualified Data.Set as S 
 import qualified Data.Map as M
+import qualified Data.Array.IArray as A
 import Data.List (sort)
-
+--import Data.Heap as H
+import Debug.Trace
 
 type Grid = [[Int]]
 type Loc = (Int, Int)
 type WeightedLoc = (Int, Loc)
-type WeightedGrid = M.Map Loc Int
+type WeightedGrid = A.Array Loc Int
 
 data St = St { _stLoc:: Loc,  _stDir:: Direction, _stTimes:: Int} deriving (Eq, Ord, Show)
 data Direction = N|E|S|W deriving (Eq, Ord, Bounded, Enum, Show)
 
 
-parse :: String -> Grid
-parse = map (map digitToInt) . lines
+parse :: String -> WeightedGrid
+parse s = A.listArray ((0,0), (maxY, maxX)) $ concat grid
+    where grid = map (map digitToInt) $ lines s
+          maxY = length grid - 1
+          maxX = (length $ head grid) - 1
 
-stateInGrid :: St -> WeightedGrid -> Bool 
-stateInGrid (St (y,x) _ _) g = (x >=0) && (y >=0) && (x <= mx) && (y <= my)
-  where (my, mx) = maximum $ M.keys g 
+_inc :: Int -> Direction -> Direction -> Int 
+_inc n d dd = if d==dd then n+1 else 1
 
-weightedGrid :: Grid -> WeightedGrid
-weightedGrid g = M.fromList [((r,c), g!!r!!c) | r <- [0..(h-1)], c <- [0..(w-1)]]
-  where h = length g 
-        w = length $ head g
+move :: St -> Direction -> St 
+move (St (y,x) d n) N = St (y-1, x) N (_inc n d N)
+move (St (y,x) d n) S = St (y+1,x ) S (_inc n d S)
+move (St (y,x) d n) E = St (y, x+1) E (_inc n d E)
+move (St (y,x) d n) W = St (y, x-1) W (_inc n d W)
 
-neighbors :: Loc -> [Loc]
-neighbors (y,x) = [(y+1, x), (y, x+1), (y-1, x), (y, x-1)]
+stateGen :: WeightedGrid -> St -> [St]
+stateGen g st = filter (\s -> let loc = _stLoc s in A.inRange (A.bounds g) loc) $ map (move st) [minBound..maxBound]
 
-move :: Loc -> Direction -> Loc 
-move (y,x) d
-  | d == N = (y-1, x)
-  | d == S = (y+1, x)
-  | d == E = (y, x+1)
-  | d == W = (y, x-1)
+update :: M.Map St Int -> St -> Int -> M.Map St Int 
+update oldMap state candidateWeight = M.insertWith min state candidateWeight oldMap
 
-whereToGo :: St -> [St]
-whereToGo (St (y,x) d n) = filter prune $ map (\d' -> St (move (y,x) d') d' (inc d')) (poss d)
-  where poss N = [N, E, W]
-        poss E = [E, N, S]
-        poss S = [S, E, W]
-        poss W = [W, N, S]
-        inc dir= if (d == dir) then n + 1 else 0
-        prune (St _ _ n') = n' < 3
-
-{-
-BFS:
-  - Priority Queue of states yet to visit, along with their best distances so far
-  - Map of all finalized states to distances
--}
-bfs :: WeightedGrid -> M.Map St Int -> [(Int, St)] -> M.Map St Int
-bfs grid finalized [] = finalized 
-bfs grid finalized ((w,s):xs) = bfs grid newFinalized newStack 
-    where newFinalized = M.insert s w finalized
-          alreadySeen = S.fromList $ M.keys finalized
-          candidates = filter (\s' -> S.notMember s' alreadySeen) $ filter (\s' -> stateInGrid s' grid) $ whereToGo s
-          withWeight = map (\s' -> (w + (M.findWithDefault (-1) (_stLoc s') grid), s')) candidates
-          protoStack = withWeight ++ xs
-          merged = foldl (\m (w', s') -> M.insertWith min s' w' m) M.empty protoStack
-          newStack = map (\(s', w') -> (w', s')) $ M.toList merged  
-          
-
--- path :: WeightedGrid -> Loc -> Loc -> Int
-path grid start end = minimum $ map snd $ filter (\(s',_) -> (_stLoc s') == end) $ M.assocs search
-  where iniStates = [St start d 0 | d <-[N,E,S,W]]
-        iniNeighbor = S.toAscList $ S.fromList $ map (\s' -> (M.findWithDefault (-1) (_stLoc s') grid, s')) $ filter (\s' -> stateInGrid s' grid) $ concat $ map whereToGo iniStates
-        search = bfs grid (M.fromList [(ini, 0) | ini <- iniStates]) iniNeighbor 
+bfs :: WeightedGrid -> Loc -> Loc -> (Int, Int) -> M.Map St Int 
+bfs grid start end (minStraight, maxStraight) = go M.empty iniPriorityQ
+  where iniPriorityQ = M.fromList [(St start d 0, 0) | d <- [N, E, S, W]]
+        go :: M.Map St Int -> M.Map St Int -> M.Map St Int 
+        go finalized pQ 
+          | length pQ == 0 = finalized
+          | otherwise = go finalized' pQ'
+            where (minW, minState) = minimum (map (\(a,b) -> (b,a)) $ M.assocs pQ )
+                  finalized' = M.insert minState minW finalized
+                  seen = S.fromList $ M.keys finalized 
+                  newStates = filter (\s -> S.notMember s seen) $ filter (\s -> (_stTimes s) <= maxStraight) $ stateGen grid minState
+                  pQ' = foldl (\acc ns -> let newWeight = minW + (A.!) grid (_stLoc ns) in update acc ns newWeight) (M.delete minState pQ) newStates
         
 
---simplePath :: WeightedGrid -> Int
-simplePath grid = path grid (0,0) largest
-  where largest = maximum $ M.keys grid
+shortestPath :: WeightedGrid -> Loc -> Loc -> (Int, Int) -> Int
+shortestPath grid start end (minStraight, maxStraight) = minimum endPoint 
+  where distMap = bfs grid start end (minStraight, maxStraight)
+        endPoint = map snd $ filter (\(s, _) -> (end == (_stLoc s))) $ M.assocs distMap
+
+crossPath :: WeightedGrid -> (Int, Int) -> Int 
+crossPath grid (minStraight, maxStraight) = shortestPath grid start end (minStraight, maxStraight)
+    where (start, end) = A.bounds grid
 
 
-testGrid = weightedGrid [[1,1,1, 2, 2, 2], [3,3,3,4,4,4]]
-
-part1 :: String -> IO()
+part1 :: String -> IO ()
 part1 filename = do 
-    contents <- readFile filename 
-    let grid = weightedGrid $ parse $ contents
-    print (simplePath grid)
+    contents <- readFile filename
+    let grid = parse contents 
+    let cost = crossPath grid (0, 3)
+    print cost 
+
+
+testArray :: WeightedGrid 
+testArray = A.listArray ((0,0), (2,2)) [1..9]
