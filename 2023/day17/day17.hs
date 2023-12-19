@@ -33,7 +33,11 @@ move (St (y,x) d n) E = St (y, x+1) E (_inc n d E)
 move (St (y,x) d n) W = St (y, x-1) W (_inc n d W)
 
 stateGen :: WeightedGrid -> St -> [St]
-stateGen g st = filter (\s -> let loc = _stLoc s in A.inRange (A.bounds g) loc) $ map (move st) [minBound..maxBound]
+stateGen g st = filter (\s -> let loc = _stLoc s in A.inRange (A.bounds g) loc) $ map (move st) $ dirList (_stDir st)
+  where dirList N = [N,E,W]
+        dirList S = [S,E,W]
+        dirList E = [E,S,N]
+        dirList W = [W,S,N]
 
 update :: M.Map St Int -> St -> Int -> M.Map St Int 
 update oldMap state candidateWeight = M.insertWith min state candidateWeight oldMap
@@ -71,4 +75,4 @@ part1 filename = do
 
 
 testArray :: WeightedGrid 
-testArray = A.listArray ((0,0), (2,2)) [1..9]
+testArray = A.listArray ((0,0), (1,5)) [1,1,1,2,2,2,3,3,3,4,4,4]
