@@ -5,8 +5,7 @@ import qualified Data.Set as S
 import qualified Data.Map as M
 import qualified Data.Array.IArray as A
 import Data.List (sort)
---import Data.Heap as H
-import Debug.Trace
+--import qualified Data.Heap as H
 
 type Grid = [[Int]]
 type Loc = (Int, Int)
@@ -43,16 +42,17 @@ update :: M.Map St Int -> St -> Int -> M.Map St Int
 update oldMap state candidateWeight = M.insertWith min state candidateWeight oldMap
 
 bfs :: WeightedGrid -> Loc -> Loc -> (Int, Int) -> M.Map St Int 
-bfs grid start end (minStraight, maxStraight) = go M.empty iniPriorityQ
+bfs grid start end (minStraight, maxStraight) = go M.empty S.empty iniPriorityQ
   where iniPriorityQ = M.fromList [(St start d 0, 0) | d <- [N, E, S, W]]
-        go :: M.Map St Int -> M.Map St Int -> M.Map St Int 
-        go finalized pQ 
+        go :: M.Map St Int -> S.Set St -> M.Map St Int -> M.Map St Int 
+        go finalized seen pQ 
           | length pQ == 0 = finalized
-          | otherwise = go finalized' pQ'
-            where (minW, minState) = minimum (map (\(a,b) -> (b,a)) $ M.assocs pQ )
+          | otherwise = go finalized' seen' pQ'
+            where (minW, minState) = minimum (map (\(a,b) -> (b,a)) $ M.assocs pQ)
                   finalized' = M.insert minState minW finalized
-                  seen = S.fromList $ M.keys finalized 
-                  newStates = filter (\s -> S.notMember s seen) $ filter (\s -> (_stTimes s) <= maxStraight) $ stateGen grid minState
+                  seen' = S.insert minState seen
+                  candidateStates = if (_stTimes minState) <= minStraight then filter (\s -> let loc = _stLoc s in A.inRange (A.bounds grid) loc) $ [move minState (_stDir minState)] else stateGen grid minState
+                  newStates = filter (\s -> S.notMember s seen') $ filter (\s -> (_stTimes s) <= maxStraight) candidateStates
                   pQ' = foldl (\acc ns -> let newWeight = minW + (A.!) grid (_stLoc ns) in update acc ns newWeight) (M.delete minState pQ) newStates
         
 
@@ -73,6 +73,15 @@ part1 filename = do
     let cost = crossPath grid (0, 3)
     print cost 
 
+part2 :: String -> IO ()
+part2 filename = do 
+    contents <- readFile filename
+    let grid = parse contents 
+    let cost = crossPath grid (4, 10)
+    print cost 
 
 testArray :: WeightedGrid 
 testArray = A.listArray ((0,0), (1,5)) [1,1,1,2,2,2,3,3,3,4,4,4]
+
+main :: IO ()
+main = part2 "input.txt"

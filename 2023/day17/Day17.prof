@@ -1,0 +1,95 @@
+	Tue Dec 19 17:33 2023 Time and Allocation Profiling Report  (Final)
+
+	   Day17 +RTS -p -RTS
+
+	total time  =      117.64 secs   (117638 ticks @ 1000 us, 1 processor)
+	total alloc = 638,731,381,032 bytes  (excludes profiling overheads)
+
+COST CENTRE  MODULE SRC                %time %alloc
+
+bfs.go.(...) Day17  day17.hs:51:19-82   96.8   99.5
+
+
+                                                                                                            individual      inherited
+COST CENTRE                             MODULE                  SRC                      no.     entries  %time %alloc   %time %alloc
+
+MAIN                                    MAIN                    <built-in>               174           0    0.0    0.0   100.0  100.0
+ CAF                                    Day17                   <entire-module>          347           0    0.0    0.0     0.0    0.0
+  main                                  Day17                   day17.hs:87:1-24         348           1    0.0    0.0     0.0    0.0
+   part2                                Day17                   day17.hs:(77,1)-(81,14)  349           1    0.0    0.0     0.0    0.0
+ CAF                                    GHC.Conc.Signal         <entire-module>          292           0    0.0    0.0     0.0    0.0
+ CAF                                    GHC.IO.Encoding         <entire-module>          273           0    0.0    0.0     0.0    0.0
+ CAF                                    GHC.IO.Encoding.Iconv   <entire-module>          271           0    0.0    0.0     0.0    0.0
+ CAF                                    GHC.IO.Exception        <entire-module>          265           0    0.0    0.0     0.0    0.0
+ CAF                                    GHC.IO.FD               <entire-module>          264           0    0.0    0.0     0.0    0.0
+ CAF                                    GHC.IO.Handle.FD        <entire-module>          262           0    0.0    0.0     0.0    0.0
+ CAF                                    GHC.IO.Handle.Internals <entire-module>          261           0    0.0    0.0     0.0    0.0
+ CAF                                    GHC.Weak.Finalize       <entire-module>          231           0    0.0    0.0     0.0    0.0
+ main                                   Day17                   day17.hs:87:1-24         350           0    0.0    0.0   100.0  100.0
+  part2                                 Day17                   day17.hs:(77,1)-(81,14)  351           0    0.0    0.0   100.0  100.0
+   part2.cost                           Day17                   day17.hs:80:9-37         352           1    0.0    0.0   100.0  100.0
+    crossPath                           Day17                   day17.hs:(65,1)-(66,38)  353           1    0.0    0.0   100.0  100.0
+     crossPath.(...)                    Day17                   day17.hs:66:11-38        360           1    0.0    0.0     0.0    0.0
+     crossPath.end                      Day17                   day17.hs:66:11-38        418           1    0.0    0.0     0.0    0.0
+     crossPath.start                    Day17                   day17.hs:66:11-38        359           1    0.0    0.0     0.0    0.0
+     shortestPath                       Day17                   day17.hs:(60,1)-(62,87)  354           1    0.0    0.0   100.0  100.0
+      shortestPath.distMap              Day17                   day17.hs:61:9-63         355           1    0.0    0.0   100.0  100.0
+       bfs                              Day17                   day17.hs:(45,1)-(56,148) 356           1    0.0    0.0   100.0  100.0
+        bfs.go                          Day17                   day17.hs:(48,9)-(56,148) 368      764225    0.1    0.0   100.0  100.0
+         bfs.go.(...)                   Day17                   day17.hs:51:19-82        369      764224   96.8   99.5    97.0   99.5
+          bfs.go.(...).\                Day17                   day17.hs:51:62-66        370  3310347306    0.0    0.0     0.0    0.0
+          <                             Day17                   day17.hs:15:81-83        371   714635072    0.2    0.0     0.2    0.0
+           compare                      Day17                   day17.hs:16:40-42        372      258227    0.0    0.0     0.0    0.0
+         bfs.go.candidateStates         Day17                   day17.hs:54:19-209       373      764224    0.0    0.0     0.2    0.1
+          _stTimes                      Day17                   day17.hs:15:51-58        374      764224    0.0    0.0     0.0    0.0
+          stateGen                      Day17                   day17.hs:(35,1)-(39,27)  405      451764    0.1    0.0     0.1    0.1
+           move                         Day17                   day17.hs:(29,1)-(32,50)  409     1355292    0.0    0.0     0.0    0.0
+            _inc                        Day17                   day17.hs:26:1-38         412     1345500    0.0    0.0     0.0    0.0
+             ==                         Day17                   day17.hs:16:36-37        413     1345500    0.0    0.0     0.0    0.0
+           stateGen.\                   Day17                   day17.hs:35:31-78        406     1355292    0.0    0.0     0.0    0.0
+            stateGen.\.loc              Day17                   day17.hs:35:35-48        410     1355292    0.0    0.0     0.0    0.0
+             _stLoc                     Day17                   day17.hs:15:16-21        411     1355292    0.0    0.0     0.0    0.0
+           _stDir                       Day17                   day17.hs:15:31-36        407      451764    0.0    0.0     0.0    0.0
+           stateGen.dirList             Day17                   day17.hs:(36,9)-(39,27)  408      451764    0.0    0.0     0.0    0.0
+          _stDir                        Day17                   day17.hs:15:31-36        376      312460    0.0    0.0     0.0    0.0
+          bfs.go.candidateStates.\      Day17                   day17.hs:54:94-144       375      312460    0.0    0.0     0.0    0.0
+           bfs.go.candidateStates.\.loc Day17                   day17.hs:54:98-111       378      312460    0.0    0.0     0.0    0.0
+            _stLoc                      Day17                   day17.hs:15:16-21        379      312460    0.0    0.0     0.0    0.0
+          move                          Day17                   day17.hs:(29,1)-(32,50)  377      312460    0.0    0.0     0.0    0.0
+           _inc                         Day17                   day17.hs:26:1-38         388      310202    0.0    0.0     0.0    0.0
+            ==                          Day17                   day17.hs:16:36-37        389      310202    0.0    0.0     0.0    0.0
+         bfs.go.finalized'              Day17                   day17.hs:52:19-63        385      764224    0.4    0.1     0.4    0.1
+          compare                       Day17                   day17.hs:15:81-83        398    16260994    0.0    0.0     0.0    0.0
+           compare                      Day17                   day17.hs:16:40-42        399     3258165    0.0    0.0     0.0    0.0
+         bfs.go.minState                Day17                   day17.hs:51:19-82        381      764224    0.0    0.0     0.0    0.0
+         bfs.go.newStates               Day17                   day17.hs:55:19-125       380      764224    0.0    0.0     1.0    0.0
+          bfs.go.newStates.\            Day17                   day17.hs:55:82-108       386     1655702    0.0    0.0     0.0    0.0
+           _stTimes                     Day17                   day17.hs:15:51-58        387     1655702    0.0    0.0     0.0    0.0
+          bfs.go.newStates.\            Day17                   day17.hs:55:45-63        390     1582382    0.8    0.0     0.9    0.0
+           compare                      Day17                   day17.hs:15:81-83        394    32286995    0.1    0.0     0.1    0.0
+            compare                     Day17                   day17.hs:16:40-42        415     5644473    0.0    0.0     0.0    0.0
+         bfs.go.pQ'                     Day17                   day17.hs:56:19-148       382      764224    0.2    0.1     0.6    0.2
+          compare                       Day17                   day17.hs:15:81-83        383     8197427    0.0    0.0     0.0    0.0
+           compare                      Day17                   day17.hs:16:40-42        384     1225783    0.0    0.0     0.0    0.0
+          bfs.go.pQ'.\                  Day17                   day17.hs:56:43-114       395      865314    0.0    0.0     0.4    0.1
+           bfs.go.pQ'.\.newWeight       Day17                   day17.hs:56:47-87        400      865314    0.1    0.0     0.1    0.0
+            _stLoc                      Day17                   day17.hs:15:16-21        402      865314    0.0    0.0     0.0    0.0
+           update                       Day17                   day17.hs:42:1-83         396      865314    0.3    0.1     0.3    0.1
+            compare                     Day17                   day17.hs:15:81-83        397    10570610    0.0    0.0     0.0    0.0
+             compare                    Day17                   day17.hs:16:40-42        414     1359658    0.0    0.0     0.0    0.0
+         bfs.go.seen'                   Day17                   day17.hs:53:19-48        391      764224    0.8    0.1     0.8    0.1
+          compare                       Day17                   day17.hs:15:81-83        392    16260994    0.1    0.0     0.1    0.0
+           compare                      Day17                   day17.hs:16:40-42        393     3258165    0.0    0.0     0.0    0.0
+         bfs.go.minW                    Day17                   day17.hs:51:19-82        401      699410    0.0    0.0     0.0    0.0
+        bfs.iniPriorityQ                Day17                   day17.hs:46:9-73         357           1    0.0    0.0     0.0    0.0
+         >=                             Day17                   day17.hs:15:81-83        358           3    0.0    0.0     0.0    0.0
+          <                             Day17                   day17.hs:15:81-83        366           3    0.0    0.0     0.0    0.0
+           compare                      Day17                   day17.hs:16:40-42        367           3    0.0    0.0     0.0    0.0
+      shortestPath.endPoint             Day17                   day17.hs:62:9-87         416           1    0.0    0.0     0.0    0.0
+       shortestPath.endPoint.\          Day17                   day17.hs:62:49-67        417      764224    0.0    0.0     0.0    0.0
+        _stLoc                          Day17                   day17.hs:15:16-21        419      764224    0.0    0.0     0.0    0.0
+   part2.grid                           Day17                   day17.hs:79:9-29         361           1    0.0    0.0     0.0    0.0
+    parse                               Day17                   day17.hs:(20,1)-(23,41)  362           1    0.0    0.0     0.0    0.0
+     parse.grid                         Day17                   day17.hs:21:11-47        363           1    0.0    0.0     0.0    0.0
+     parse.maxX                         Day17                   day17.hs:23:11-41        365           1    0.0    0.0     0.0    0.0
+     parse.maxY                         Day17                   day17.hs:22:11-32        364           1    0.0    0.0     0.0    0.0
