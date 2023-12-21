@@ -83,10 +83,3 @@ part2 filename = do
     let nCycles = div (wanted - 65) 131
     putStrLn $ printGarden garden
     print $ func nCycles
-    print $ length $ moveNInfinite [startLoc] garden 6
-    print $ length $ moveNInfinite [startLoc] garden 10
-    print $ length $ moveNInfinite [startLoc] garden 50
-    print $ length $ moveNInfinite [startLoc] garden 100
-    print $ length $ moveNInfinite [startLoc] garden 500
-    print $ length $ moveNInfinite [startLoc] garden 1000
-    print $ length $ moveNInfinite [startLoc] garden 5000
