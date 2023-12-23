@@ -123,15 +123,15 @@ contract grid = M.fromList miniMaps
 
 
 dfs :: WeightedGrid -> Loc -> Loc -> [[Loc]]
-dfs grid start end = helper grid [] start end
-  where helper :: WeightedGrid -> [Loc] -> Loc -> Loc -> [[Loc]]
-        helper grid seen current end
-          | current == end = [reverse $ current:seen]
-          | otherwise = concat [helper grid (current:seen) current' end| current' <- possible]
+dfs grid start end = helper grid [] S.empty start end
+  where helper :: WeightedGrid -> [Loc] -> (S.Set Loc) -> Loc -> Loc -> [[Loc]]
+        helper grid seenPath seenSet current end
+          | current == end = [reverse $ current:seenPath]
+          | otherwise = concat [helper grid (current:seenPath) (S.insert current seenSet) current' end| current' <- possible]
             where possible' = case M.lookup current grid of 
                                 Nothing -> error "Cannot find this location"
                                 Just edges -> M.keys edges
-                  possible = [p | p <- possible', notElem p seen]
+                  possible = [p | p <- possible', S.notMember p seenSet]
 
 pathLength :: WeightedGrid -> [Loc] -> Int
 pathLength grid path = helper grid (0) path
@@ -153,7 +153,7 @@ part2again filename = do
     print (show weightGrid)
     let paths = dfs weightGrid start end
     let lengths = map (pathLength weightGrid) paths
-    print $ sort lengths
+    print $ maximum lengths
 
 
 myMap = (A.listArray ((0,0), (4,4)) $ map (parseTile) $ concat ["#.###", 
@@ -163,3 +163,6 @@ myMap = (A.listArray ((0,0), (4,4)) $ map (parseTile) $ concat ["#.###",
                                   "###.#"])::Grid
 
 wmap = contract myMap
+
+main :: IO ()
+main = part2again "input.txt"
