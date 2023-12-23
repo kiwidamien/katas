@@ -36,20 +36,10 @@ send (Low _) (LM l (FlipFlop Off)) = (Just (High l), LM l (FlipFlop On))
 send (Low _) (LM l (FlipFlop On)) = (Just (Low l), LM l (FlipFlop Off))
 send pulse (LM l (Conjunction memory)) = (Just pulseType, LM l (Conjunction memory'))
   where memory' = M.insert (origin pulse) pulse memory
-        pulseType = if all isHigh (M.elems memory') then (Low $ origin pulse)  else (High $ origin pulse)
+        pulseType = if all isHigh (M.elems memory') then (Low l)  else (High l)
 send p (LM l Broadcaster) = (Just (setOrigin p l), (LM l Broadcaster))
 send p (LM l Sink) = (Nothing, LM l Sink)
 
-{-
-getDependents :: Label -> ModuleBoard -> [LabeledModule]
-getDependents label board = outputs
-    where  fn lab = case (M.lookup lab board) of
-                        Just (m, _) -> m
-                        Nothing -> error ("No module with label " ++ label)
-           outputs = case (M.lookup label board) of 
-                       Nothing -> []
-                       Just (_, others) -> map fn others
--}
 
 
 process :: Pulse -> Label -> ModuleBoard -> (ModuleBoard, [(Pulse, Label)], (Integer, Integer)) 
