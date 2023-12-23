@@ -2,7 +2,6 @@ module Day20 where
 
 import qualified Data.Map as M 
 import qualified Data.Set as S
-import Debug.Trace
 
 type Label = String
 type Origin = String
@@ -43,7 +42,7 @@ send p (LM l Sink) = (Nothing, LM l Sink)
 
 
 process :: Pulse -> Label -> ModuleBoard -> (ModuleBoard, [(Pulse, Label)], (Integer, Integer)) 
-process pulse label board = trace (show newPulses) (board', newPulses, (low', high'))
+process pulse label board = (board', newPulses, (low', high'))
   where (theModule, outputs) = case M.lookup label board of
             Just (m, outputs) -> (m, outputs) 
             Nothing -> error ("No module with label " ++ label)
@@ -101,8 +100,3 @@ part1 filename = do
     board <- parse <$> readFile filename
     let (_, (low, high)) = pressButtonMany board 1000
     print ((show low) ++ " x " ++ (show high) ++ " = " ++ (show $ low * high))
-
-
-pressButtonUntilRepeat :: ModuleBoard -> (Integer, (Integer, Integer))
-pressButtonUntilRepeat board' = undefined 
-  where x = 4
