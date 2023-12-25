@@ -1,6 +1,7 @@
 module Day22 where 
 
-import Data.List (sortBy)
+import Data.List (sortBy, sort, groupBy)
+import qualified Data.Map as M
 import Debug.Trace 
 
 
@@ -81,6 +82,24 @@ canRemove blocks b = all (==0) $ map (\b' -> canMoveDown b' noB) noB
 howManyCanRemove :: [Block] -> Int
 howManyCanRemove blocks = length $ filter (id) $ map (canRemoveFromCollapsed blocks) blocks
 
+_supports :: [Block] -> Block -> [Block]
+_supports collapsed b = directSupport 
+  where (zmin, zmax) = zRange b
+        relevant = filter (\b' -> let (zmin'', _) = zRange b' in zmin'' == zmax + 1) collapsed
+        ourXRange = xRange b 
+        ourYRange = yRange b 
+        directSupport = filter (\b' -> (overlap ourXRange (xRange b') && (overlap ourYRange (yRange b')))) relevant
+      
+supports :: [Block] -> M.Map Block [Block]
+supports collapsed = M.fromList $ map (\b' -> (b', _supports collapsed b')) collapsed
+
+supportedBy :: M.Map Block [Block] -> M.Map Block [Block]
+supportedBy supportMap = M.fromList tuples
+  where tuples = map (\gp -> let (b', _) = head gp in (b', map snd gp)) $ groupBy (\a b -> fst a == fst b) $ sort $ concat $ map explode $ M.assocs supportMap
+
+explode :: (a, [b]) -> [(a,b)]
+explode (a, []) = []
+explode (a, (b:bs)) = (a,b) : explode (a, bs)
 
 canRemoveFromCollapsed :: [Block] -> Block -> Bool 
 canRemoveFromCollapsed blocks b = trace (show relevant ++ " " ++ show b ++ " " ++ (show willCollapse)) (length willCollapse > 0) 
@@ -145,14 +164,14 @@ part2 filename = do
 
 -}
 
-{-
+
 ini = [
     "1,0,1~1,2,1","0,0,2~2,0,2","0,2,3~2,2,3","0,0,4~0,2,4","2,0,5~2,2,5","0,1,6~2,1,6","1,1,8~1,1,9"
   ]
 
 exBlocks = map parseLine ini
-
-
+collapsed = sortBlocks $ converge exBlocks
+{-
 main :: IO() 
 main = part2 "input.txt"
 -}
