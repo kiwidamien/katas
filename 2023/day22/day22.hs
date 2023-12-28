@@ -1,177 +1,158 @@
 module Day22 where 
 
-import Data.List (sortBy, sort, groupBy)
+import Data.List 
 import qualified Data.Map as M
-import Debug.Trace 
+import qualified Data.Set as S
+
+type Pos = (Int, Int, Int)
+type Block = (Pos, Pos)
 
 
-type Loc = (Int, Int, Int)
-type Block = (Loc, Loc)
+-- Utility 
 
-_x :: Loc -> Int 
-_x (x, _, _) = x 
+minHeight :: Block -> Int 
+minHeight ((_,_,z1), (_,_,z2)) = min z1 z2
 
-_y :: Loc -> Int
-_y (_, y, _) = y 
+maxHeight :: Block -> Int
+maxHeight ((_, _, z1), (_,_,z2)) = max z1 z2
 
-_z :: Loc -> Int 
-_z (_, _, z) = z 
+moveDown :: Block -> Int -> Block 
+moveDown ((x,y,z), (a,b,c)) n = ((x,y,z-n), (a,b,c-n))
 
 xRange :: Block -> (Int, Int)
-xRange (l1, l2) = (min (_x l1) (_x l2), max (_x l1) (_x l2))
+xRange ((x,_,_), (u,_,_)) = (min x u, max x u)
 
 yRange :: Block -> (Int, Int)
-yRange (l1, l2) = (min (_y l1) (_y l2), max (_y l1) (_y l2))
+yRange ((_,y,_), (_, w, _)) = (min y w, max y w)
 
-zRange :: Block -> (Int, Int)
-zRange (l1, l2) = (min (_z l1) (_z l2), max (_z l1) (_z l2))
-
-splitOn :: Char -> String -> [String]
-splitOn _ [] = []
-splitOn c s = let (f', s') = break (==c) s in f': (splitOn c $ drop 1 s')
-
-parseLine :: String -> Block
-parseLine line = let (cnr1, _:cnr2) = break (=='~') line in (fn cnr1, fn cnr2)
-  where fn s = let (a:b:c:_) = splitOn ',' s in (read a, read b, read c)
 
 overlap :: (Int, Int) -> (Int, Int) -> Bool 
-overlap (l1, h1) (l2, h2)
-  | h1 < l2 = False
-  | h2 < l1 = False
-  | otherwise = True 
+overlap (a, a') (b, b') = let 
+    low = min a a' 
+    high = max a a'
+    low' = min b b'
+    high' = max b b' 
+    in not ((high < low') || (low > high'))
+
+overlap2d :: Block -> Block -> Bool 
+overlap2d b1 b2 = (overlap (xRange b1) (xRange b2)) && (overlap (yRange b1) (yRange b2))
 
 sortBlocks :: [Block] -> [Block]
-sortBlocks = sortBy (\b' c -> let ((bzMin, _), (czMin, _))  = (zRange b', zRange c) in compare bzMin czMin)
-
-moveDownN :: Int -> Block -> Block 
-moveDownN n ((x1,y1,z1), (x2,y2,z2))  = ((x1,y1,z1-n), (x2, y2, z2-n))
-
-moveDown :: Block -> Block 
-moveDown = moveDownN 1
-
-canMoveDown :: Block -> [Block] -> Int 
-canMoveDown b blocks = ourZMin - ((maximum heights) + 1)
-    where orderedBlocks = blocks
-          ourZMin = let (bzMin, _) = zRange b in bzMin
-          belowUs = filter (\b' -> let (bzMin, _) = zRange b' in bzMin < ourZMin) $ orderedBlocks
-          ourYRange = yRange b 
-          ourXRange = xRange b
-          relevant = filter (\b' -> overlap (yRange b') ourYRange) $ filter (\b' -> overlap (xRange b') ourXRange) belowUs
-          heights = [0] ++ (map (\b' -> let (_, bzMax) = zRange b' in bzMax) relevant)
+sortBlocks blocks = sortBy (\a' b' -> compare (minHeight a') (minHeight b')) blocks
 
 
-moveDownFirst :: [Block] -> [Block] -> ([Block], [Block])
-moveDownFirst frozen [] = (frozen, [])
-moveDownFirst frozen (b:rest) = (newFrozenBlock:frozen, rest) 
-  where newFrozenBlock = moveDownN (canMoveDown b frozen) b
+collapseBlock :: [Block] -> Block -> Block
+collapseBlock pile block = moveDown block amount
+  where lowPoint = minHeight block
+        removed = filter (\b' -> maxHeight b' < lowPoint) $ filter (/=block) pile
+        ourX = xRange block 
+        ourY = yRange block
+        blocking = sortBy (\a' b' -> compare (maxHeight b') (maxHeight a')) $ filter (\b' -> (overlap (xRange b') ourX) && (overlap (yRange b') ourY)) removed
+        amount = if length blocking == 0 then (lowPoint - 1) else let b' = head blocking in (minHeight block) - (maxHeight b') - 1
+
+collapsePile :: [Block] -> [Block]
+collapsePile pile = sortBlocks $ foldl (\pile block -> (collapseBlock pile block):pile) [] sortedPile
+    where sortedPile = sortBlocks pile
+
+-- Part 1
+
+firstSupportsSecond :: Block -> Block -> Bool
+firstSupportsSecond first second = (((maxHeight first) + 1) == (minHeight second)) && (overlap2d first second) && (first /= second)
 
 
-converge :: [Block] -> [Block]
-converge blocks = go [] orderedBlocks
-  where orderedBlocks = sortBlocks blocks
-        go frozen rest
-          | rest == [] = frozen
-          | otherwise = let (frozen', rest') = moveDownFirst frozen rest in go frozen' rest'
+supports :: [Block] -> M.Map Block (S.Set Block)
+supports pile = M.fromList $ map (\supporter -> (supporter, S.filter (firstSupportsSecond supporter) (S.fromList pile))) pile  
 
+supportedBy :: [Block] -> M.Map Block (S.Set Block)
+supportedBy pile = M.fromList $ map (\supportedBy -> if minHeight supportedBy == 1 then (supportedBy, S.singleton ((0,0,0), (0,0,0))) else (supportedBy, S.filter (\s -> firstSupportsSecond s supportedBy) (S.fromList pile))) pile
 
-canRemove :: [Block] -> Block -> Bool 
-canRemove blocks b = all (==0) $ map (\b' -> canMoveDown b' noB) noB 
-    where noB = filter (/=b) blocks
-
-
-howManyCanRemove :: [Block] -> Int
-howManyCanRemove blocks = length $ filter (id) $ map (canRemoveFromCollapsed blocks) blocks
-
-_supports :: [Block] -> Block -> [Block]
-_supports collapsed b = directSupport 
-  where (zmin, zmax) = zRange b
-        relevant = filter (\b' -> let (zmin'', _) = zRange b' in zmin'' == zmax + 1) collapsed
-        ourXRange = xRange b 
-        ourYRange = yRange b 
-        directSupport = filter (\b' -> (overlap ourXRange (xRange b') && (overlap ourYRange (yRange b')))) relevant
-      
-supports :: [Block] -> M.Map Block [Block]
-supports collapsed = M.fromList $ map (\b' -> (b', _supports collapsed b')) collapsed
-
-supportedBy :: M.Map Block [Block] -> M.Map Block [Block]
-supportedBy supportMap = M.fromList tuples
-  where tuples = map (\gp -> let (b', _) = head gp in (b', map snd gp)) $ groupBy (\a b -> fst a == fst b) $ sort $ concat $ map explode $ M.assocs supportMap
-
-explode :: (a, [b]) -> [(a,b)]
-explode (a, []) = []
-explode (a, (b:bs)) = (a,b) : explode (a, bs)
-
-canRemoveFromCollapsed :: [Block] -> Block -> Bool 
-canRemoveFromCollapsed blocks b = trace (show relevant ++ " " ++ show b ++ " " ++ (show willCollapse)) (length willCollapse > 0) 
-  where (zmin, zmax) = zRange b
-        relevant =  filter (\b' -> let (zmin'', _) = zRange b' in zmin''==zmax+1) blocks
-        ourXRange = xRange b 
-        ourYRange = yRange b 
-        willCollapse = map (\b' -> (overlap ourXRange (xRange b')) && (overlap ourYRange (yRange b'))) relevant
-
+{-
+A key block is any block that is a sole support of at least one block
+-}
+keyBlocks :: [Block] -> [Block]
+keyBlocks pile = S.toAscList (S.difference areUniqueSupport (S.singleton ((0,0,0), (0,0,0))))
+  where supp = supportedBy pile
+        areUniqueSupport = S.unions $ filter (\suppSet -> length suppSet == 1) $ M.elems supp
+            
 
 part1 :: String -> IO ()
 part1 filename = do 
-    contents <- lines <$> readFile filename 
-    let blocks = map parseLine contents
-    let steady = converge blocks 
-    print steady
-    let canSafelyRemove = howManyCanRemove steady 
-    print canSafelyRemove
+    contents <- readFile filename 
+    let pile = parse contents
+    let stablePile = collapsePile pile 
+    print( length $ stablePile)
+    let cannotDestroy = keyBlocks stablePile
+    print((length stablePile) - (length $ cannotDestroy))
+
+-- Part 2            
+
+buildCache :: [Block] -> M.Map Block (S.Set Block)
+buildCache pile = go (M.empty) topToBottom 
+  where topToBottom = reverse $ sortBlocks pile 
+        s = supports pile
+        sByIni = supportedBy pile
+        go :: (M.Map Block (S.Set Block)) -> [Block] -> M.Map Block (S.Set Block)
+        go cache [] =  cache
+        go cache (block:rest) = case M.lookup block cache of 
+            Just _ -> go cache rest
+            Nothing -> go cache' rest
+              where cache' = M.insert block (help sByIni cache (S.singleton block)) cache
+        help :: (M.Map Block (S.Set Block)) -> (M.Map Block (S.Set Block))  -> (S.Set Block) -> (S.Set Block)
+        help sBy cache removed  
+          | length removed == 0 = S.empty
+          | otherwise = ans
+            where alreadyFallen = S.unions $ M.elems $ M.filterWithKey (\k _ -> S.member k removed) cache
+                  withAdditional = S.union alreadyFallen removed
+                  sByPostRemoval = M.map (\supportSet -> S.difference supportSet withAdditional) $ M.filterWithKey (\k _ -> S.notMember k withAdditional) sBy
+                  willFall = S.fromList $ M.keys $ M.filter (\supportSet -> length supportSet == 0) sByPostRemoval
+                  ans = S.union withAdditional (help sByPostRemoval cache (S.difference willFall withAdditional))
+
+
+--Pt2 Answer should be 70727
+chainReaction :: [Block] -> Int 
+chainReaction pile = sum $ map (\blockCollapse -> length blockCollapse - 1) (M.elems cache)
+  where cache = buildCache pile
+
+
+chainReactionTest :: [Block] -> [Block] -> [Int]
+chainReactionTest pile testSet = map (\blockCollapse -> length blockCollapse - 1) (map (\b -> M.findWithDefault S.empty b cache) testSet)
+  where cache = buildCache pile 
+
 
 part2 :: String -> IO ()
 part2 filename = do 
-    contents <- lines <$> readFile filename 
-    let blocks = map parseLine contents 
-    let steady = converge blocks
-    print steady
+    contents <- readFile filename 
+    let pile = parse contents
+    putStrLn "Parsed the pile" 
+    let stablePile = collapsePile pile 
+    putStrLn "Collapsed the pile"
+    let chainReactions = chainReaction stablePile
+    print (chainReactions)
 
 
-{-
+-- Parsing
+parse :: String -> [Block]
+parse contents = map parseLine $ lines contents
+  where parseLine line = let (begin,_:end) = break (=='~') line in (nums begin, nums end)
+        nums s = let nStr::[Int] = map read $ words $ map (\c -> if c == ',' then ' ' else c) s in 
+                     (nStr!!0, nStr!!1, nStr!!2)
 
-shakeDown :: [Block] -> [Block]
-shakeDown blocks = sortBlocks $ stationary ++ (map (\(amt, b) -> moveDownN amt b)) onlyMovingBlocks
-  where movement = map (\b -> canMoveDown b blocks) blocks
-        onlyMovingBlocks = filter (\(amt, _) -> amt > 0) $ zip movement blocks
-        stationary = map snd $ filter (\(amt, _) -> amt == 0) $ zip movement blocks
+-- Examples
 
-converge :: [Block] -> [Block]
-converge blocks = fst $ head $ dropWhile (\(a,b) -> (a/=b)) $ zip blockChain (drop 1 blockChain)
-    where blockChain = iterate shakeDown blocks
+exBlocksStr = [
+    "1,0,1~1,2,1", 
+    "0,0,2~2,0,2",
+    "0,2,3~2,2,3",
+    "0,0,4~0,2,4",
+    "2,0,5~2,2,5",
+    "0,1,6~2,1,6",
+    "1,1,8~1,1,9"]
 
-canRemove :: [Block] -> Block -> Bool 
-canRemove blocks b = noB == shakeDown noB 
-    where noB = filter (/=b) blocks
+exBlocks :: [Block]
+exBlocks = parse $ unlines exBlocksStr
 
-howManyCanRemove :: [Block] -> Int
-howManyCanRemove blocks = length $ filter (id) $ map (canRemove blocks) blocks
+steady :: [Block]
+steady = collapsePile exBlocks
 
-part1 :: String -> IO ()
-part1 filename = do 
-    contents <- lines <$> readFile filename 
-    let blocks = map parseLine contents
-    let steady = converge blocks 
-    let canSafelyRemove = howManyCanRemove steady 
-    print canSafelyRemove
-
-part2 :: String -> IO ()
-part2 filename = do 
-    contents <- lines <$> readFile filename 
-    let blocks = map parseLine contents 
-    let ans = map (\b -> canMoveDown b blocks) blocks
-    print ans
-
-
--}
-
-
-ini = [
-    "1,0,1~1,2,1","0,0,2~2,0,2","0,2,3~2,2,3","0,0,4~0,2,4","2,0,5~2,2,5","0,1,6~2,1,6","1,1,8~1,1,9"
-  ]
-
-exBlocks = map parseLine ini
-collapsed = sortBlocks $ converge exBlocks
-{-
-main :: IO() 
-main = part2 "input.txt"
--}
+lowest :: Block
+lowest = head steady
