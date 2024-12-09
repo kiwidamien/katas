@@ -44,7 +44,7 @@ topoSort :: Pages -> RuleBook -> Pages
 topoSort pages rules = go [] rules pages
   where go :: Pages -> RuleBook -> Pages -> Pages
         go sorted _ [] = sorted
-        go sorted rules (p:ps) = sorted
+        go [] rules (p:ps) = go [p] rules ps
 
 
 ex = lines <$> readFile "example.txt"
