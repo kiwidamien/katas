@@ -1,5 +1,7 @@
 import qualified Data.Map as M 
 import qualified Data.Set as S 
+import Data.List (sort, sortBy)
+
 
 data Rule = Rule Int Int deriving (Show, Eq)
 type RuleBook = M.Map Int [Int]
@@ -12,8 +14,7 @@ parseRule s= Rule (read first) (read second)
 
 ruleBook :: [Rule] -> RuleBook 
 ruleBook rules = M.fromListWith (++) tups 
-  where extractRule rule = case rule of 
-            Rule a b -> (a,[b])
+  where extractRule (Rule a b) = (a,[b])
         tups = map extractRule rules
 
 disallowedRuleBook :: [Rule] -> RuleBook
@@ -40,14 +41,29 @@ commaSep :: String -> Pages
 commaSep "" = []
 commaSep s = (read $ takeWhile (/=',') s):(commaSep $ drop 1 $ dropWhile (/=',') s)
 
-topoSort :: Pages -> RuleBook -> Pages 
-topoSort pages rules = go [] rules pages
-  where go :: Pages -> RuleBook -> Pages -> Pages
-        go sorted _ [] = sorted
-        go [] rules (p:ps) = go [p] rules ps
-        go sorted rules (p:ps) = undefined
-          
 
+-- sortGT (a1, b1) (a2, b2)
+--   | a1 < a2 = GT
+--   | a1 > a2 = LT
+--   | a1 == a2 = compare b1 b2
+
+
+-- topoSort :: Pages -> RuleBook -> Pages 
+-- topoSort pages rules = go [] rules pages
+--   where go :: Pages -> RuleBook -> Pages -> Pages
+--         go sorted _ [] = sorted
+--         go [] rules (p:ps) = go [p] rules ps
+--         go sorted rules (p:ps) = undefined
+
+intercut :: Int -> Pages -> [Pages]
+intercut y pages = scanl (\acc a -> ((take a pages) ++ [y] ++ (drop a pages))) (y:pages) [1..(length pages)]
+
+pageSort :: Pages -> RuleBook -> Pages
+pageSort pages rulebook = go [] pages rulebook
+  where go :: Pages -> Pages -> RuleBook -> Pages 
+        go sorted [] _ = sorted
+        go sorted (p:ps) rules = go (insert p sorted rules) ps rules
+        insert p s r = head $ filter (\ps -> obeyAllRules ps r) $ intercut p s
 
 ex = lines <$> readFile "example.txt"
 rules = map parseRule <$> takeWhile (\x -> length x > 0) <$> ex
@@ -64,3 +80,14 @@ part1 filename = do
     let pages = map commaSep $ drop 1 $ dropWhile (\x -> length x > 0) $ contents
     let working = obeyAllRulesArray pages dis
     print(sum $ map middle working)
+
+part2 :: String -> IO ()
+part2 filename = do 
+  contents <- lines <$> readFile filename 
+  let rules = map parseRule $ takeWhile (\x -> length x > 0) $ contents
+  let dis = disallowedRuleBook rules
+  let rb = ruleBook rules
+  let pages = map commaSep $ drop 1 $ dropWhile (\x -> length x > 0) $ contents 
+  let working = obeyAllRulesArray pages dis 
+  let notWorking = filter (\ps -> (obeyAllRules ps dis) == False) pages
+  print(sum $ map (\x -> middle $ pageSort x rb) notWorking)
