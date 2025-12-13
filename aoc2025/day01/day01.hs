@@ -1,9 +1,11 @@
 moveDial :: Int -> Int -> Int
 moveDial state amount = mod (state + amount) 100
 
+
 parseLine :: [Char] -> Int
 parseLine ('L':rest) = 0 - read rest::Int
 parseLine ('R':rest) = (read rest::Int)
+
 
 movesCountZero :: Int -> [Int] -> (Int, Int)
 movesCountZero start moves = foldl prop (0, start) moves
