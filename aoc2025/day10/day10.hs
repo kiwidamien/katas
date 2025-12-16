@@ -1,3 +1,10 @@
+module Day10 (
+  solutionOne,
+  solutionTwo,
+  bfs,
+  parse
+) where
+
 import qualified Data.Set as S 
 import Data.List (nub)
 import Debug.Trace (trace)
